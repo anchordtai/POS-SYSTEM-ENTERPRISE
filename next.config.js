@@ -5,10 +5,10 @@ const nextConfig = {
     domains: ['localhost', 'images.unsplash.com'],
   },
   experimental: {
-    optimizePackageImports: true,
-  optimizeCss: true,
-  optimizeServerReact: true,
-  esmExternals: true
+    optimizePackageImports: ['tailwindcss'],
+    optimizeCss: true,
+    optimizeServerReact: true,
+    esmExternals: true
   },
   webpack: (config, { buildId, dev, isServer, webpack }) => {
     config.resolve = {

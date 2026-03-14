@@ -52,6 +52,9 @@
     "typescript": "^5.3.0",
     "wait-on": "^7.2.0"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "build": {
     "appId": "com.onyxxnightlife.pos",
     "productName": "Onyxx Nightlife POS",
