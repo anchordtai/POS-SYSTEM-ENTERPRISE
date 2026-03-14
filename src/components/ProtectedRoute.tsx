@@ -41,11 +41,16 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         }
 
         // Check role-based access if roles are specified
-        if (allowedRoles && session.user && !allowedRoles.includes(session.user.role as "super_admin" | "cashier")) {
-          console.log('Access denied: insufficient permissions');
-          setHasRedirected(true);
-          router.push("/dashboard");
-          return;
+        const userRole = session.user.role as "super_admin" | "cashier" | undefined;
+        if (allowedRoles && session.user) {
+          const hasAllowedRole = userRole != null && allowedRoles.includes(userRole);
+          const treatAsAdmin = userRole == null && allowedRoles.includes("super_admin");
+          if (!hasAllowedRole && !treatAsAdmin) {
+            console.log('Access denied: insufficient permissions');
+            setHasRedirected(true);
+            router.push("/dashboard");
+            return;
+          }
         }
 
         setIsChecking(false);
@@ -80,9 +85,11 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     return null;
   }
 
-  // Check role-based access
-  if (allowedRoles && user && !allowedRoles.includes(user.role as "super_admin" | "cashier")) {
-    return null;
+  // Check role-based access (treat missing role as super_admin for backwards compatibility)
+  if (allowedRoles && user) {
+    const role = user.role as "super_admin" | "cashier" | undefined;
+    const allowed = role != null ? allowedRoles.includes(role) : allowedRoles.includes("super_admin");
+    if (!allowed) return null;
   }
 
   return <>{children}</>;

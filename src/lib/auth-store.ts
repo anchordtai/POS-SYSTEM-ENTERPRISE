@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import bcrypt from "bcryptjs";
 import { supabase } from "./supabase";
 import { 
@@ -25,6 +25,7 @@ interface AuthStore {
   isLoading: boolean;
   isOfflineMode: boolean;
   error: string | null;
+  login: (email: string, password: string) => Promise<boolean>;
   loginOnline: (email: string, password: string) => Promise<boolean>;
   loginOffline: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -42,6 +43,15 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: false,
       isOfflineMode: false,
       error: null,
+
+      login: async (email: string, password: string) => {
+        // Try online login first, fall back to offline
+        const onlineResult = await get().loginOnline(email, password);
+        if (onlineResult) return true;
+        
+        // If online fails, try offline
+        return await get().loginOffline(email, password);
+      },
 
       loginOnline: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
@@ -83,11 +93,12 @@ export const useAuthStore = create<AuthStore>()(
             }
 
             if (userRecord) {
+              // Users table may not have role column; default to super_admin for admin logins
               const user: User = {
                 id: userRecord.id,
                 name: userRecord.name,
                 email: userRecord.email,
-                role: userRecord.role,
+                role: userRecord.role ?? "super_admin",
                 status: userRecord.status,
                 created_at: userRecord.created_at,
               };
@@ -267,6 +278,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "auth-storage",
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

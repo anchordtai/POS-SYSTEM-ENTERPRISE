@@ -8,6 +8,15 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Onyxx Nightlife POS",
   description: "Point of Sale System for Nightlife Venues",
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "Onyxx POS" },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#6366f1",
 };
 
 export default function RootLayout({

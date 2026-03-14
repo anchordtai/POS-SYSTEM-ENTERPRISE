@@ -1,20 +1,19 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['localhost', 'images.unsplash.com'],
   },
-  webpack: (config, { buildId, dev, isServer, webpack }) => {
-    config.resolve = {
-      ...config.resolve,
-      alias: {
-        '@': './src',
-        '@/lib': './src/lib',
-        '@/components': './src/components'
-      }
+  // Path alias is resolved via tsconfig.json paths; ensure webpack matches
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
     };
     return config;
-  }
-}
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

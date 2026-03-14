@@ -130,10 +130,19 @@ export default function POSPage() {
       const subtotal = getSubtotal();
       const tax = getTax();
       const total = getTotal();
+
+      // sales.cashier_id FK references users table – use Supabase auth user id so the key exists
+      const { data: { session } } = await supabase.auth.getSession();
+      const cashierIdForDb = session?.user?.id ?? user?.id;
+      if (!cashierIdForDb) {
+        alert("Session expired. Please sign in again.");
+        setProcessingPayment(false);
+        return;
+      }
       
       const saleData = {
-        cashier_id: user?.id,
-        cashier_name: user?.name,
+        cashier_id: cashierIdForDb,
+        cashier_name: user?.name ?? "Cashier",
         total_amount: total,
         payment_method: paymentMethod,
         receipt_number: `RCP${Date.now()}`,

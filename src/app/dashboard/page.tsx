@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuthStore } from "@/lib/store";
+import { useAuthStore } from "@/lib/auth-store";
 import {
   FiDollarSign,
   FiShoppingCart,

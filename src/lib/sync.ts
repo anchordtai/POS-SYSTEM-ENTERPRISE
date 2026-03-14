@@ -84,11 +84,16 @@ async function syncItem(item: any) {
       if (data) await saveProducts([data]);
       break;
 
-    case "sale":
-      // Insert sale first
+    case "sale": {
+      // sales.cashier_id must reference users table – use current auth user id
+      const { data: { session } } = await supabase.auth.getSession();
+      const salePayload = {
+        ...item.data.sale,
+        cashier_id: session?.user?.id ?? item.data.sale.cashier_id,
+      };
       const { data: saleData } = await supabase
         .from("sales")
-        .insert(item.data.sale)
+        .insert(salePayload)
         .select()
         .single();
 
@@ -114,6 +119,7 @@ async function syncItem(item: any) {
         await saveSale({ ...saleData, items: item.data.items });
       }
       break;
+    }
 
     case "inventory_update":
       await supabase.from("inventory_logs").insert(item.data);

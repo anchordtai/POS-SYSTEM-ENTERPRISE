@@ -135,12 +135,14 @@ export class ThermalPrinterService {
         
         printWindow.document.close();
         
-        // Auto-print with delay for thermal printer compatibility
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-          resolve(true);
-        }, 500);
+        // Instant print: minimal delay only for render to complete
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            printWindow.print();
+            printWindow.close();
+            resolve(true);
+          });
+        });
       } else {
         resolve(false);
       }
