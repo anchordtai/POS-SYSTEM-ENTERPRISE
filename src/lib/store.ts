@@ -10,10 +10,8 @@ interface CartStore {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getSubtotal: () => number;
-  getTax: () => number;
   getTotal: () => number;
   getFormattedSubtotal: () => string;
-  getFormattedTax: () => string;
   getFormattedTotal: () => string;
 }
 
@@ -76,21 +74,14 @@ export const useCartStore = create<CartStore>()(
         return get().items.reduce((sum, item) => sum + item.subtotal, 0);
       },
 
-      getTax: () => {
-        return get().getSubtotal() * 0.05; // 5% tax
-      },
-
       getTotal: () => {
-        return get().getSubtotal() + get().getTax();
+        return get().getSubtotal();
       },
 
       getFormattedSubtotal: () => {
         return formatCurrency(get().getSubtotal());
       },
 
-      getFormattedTax: () => {
-        return formatCurrency(get().getTax());
-      },
 
       getFormattedTotal: () => {
         return formatCurrency(get().getTotal());

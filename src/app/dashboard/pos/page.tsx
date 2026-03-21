@@ -34,7 +34,7 @@ interface CartItem {
 
 export default function POSPage() {
   const { user, isAuthenticated, isOfflineMode } = useAuthStore();
-  const { items, addItem, removeItem, updateQuantity, clearCart, getSubtotal, getTax, getTotal } = useCartStore();
+  const { items, addItem, removeItem, updateQuantity, clearCart, getSubtotal, getTotal } = useCartStore();
   
   const [products, setProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -128,7 +128,6 @@ export default function POSPage() {
     
     try {
       const subtotal = getSubtotal();
-      const tax = getTax();
       const total = getTotal();
 
       // sales.cashier_id FK references users table – use Supabase auth user id so the key exists
@@ -268,7 +267,6 @@ ${saleData.items.map((item: any) =>
 ).join('\n')}
 ----------------------------------------
 SUBTOTAL: ${formatCurrency(getSubtotal())}
-TAX (5%): ${formatCurrency(getTax())}
 TOTAL: ${formatCurrency(getTotal())}
 ========================================
 Thank you for your purchase!
@@ -335,7 +333,6 @@ Thank you for your purchase!
   });
 
   const subtotal = getSubtotal();
-  const tax = getTax();
   const total = getTotal();
 
   if (loading) {
@@ -594,10 +591,6 @@ Thank you for your purchase!
               <span>Subtotal:</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-white">
-              <span>Tax (5%):</span>
-              <span>{formatCurrency(tax)}</span>
-            </div>
             <div className="flex justify-between text-xl font-bold text-primary pt-2 border-t border-night-700">
               <span>Total:</span>
               <span>{formatCurrency(total)}</span>
@@ -646,10 +639,6 @@ Thank you for your purchase!
               <div className="flex justify-between text-white">
                 <span>Subtotal:</span>
                 <span>{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-white">
-                <span>Tax (5%):</span>
-                <span>{formatCurrency(tax)}</span>
               </div>
               <div className="flex justify-between text-xl font-bold text-primary pt-2 border-t border-night-700">
                 <span>Total:</span>

@@ -33,7 +33,7 @@ export interface ReceiptData {
   address: string[];
   receiptNumber: string;
   date: string;
-  cashier: string;
+  cashierName: string;
   items: Array<{
     name: string;
     quantity: number;
@@ -41,7 +41,6 @@ export interface ReceiptData {
     subtotal: number;
   }>;
   subtotal: number;
-  tax: number;
   total: number;
   paymentMethod: string;
 }
@@ -110,7 +109,6 @@ async function printThermalReceipt(data: ReceiptData) {
 
   receipt += "\n" + BOLD_ON + ALIGN_CENTER;
   receipt += `Subtotal: ${formatCurrency(data.subtotal)}\n`;
-  if (data.tax > 0) receipt += `Tax: ${formatCurrency(data.tax)}\n`;
   receipt += `TOTAL: ${formatCurrency(data.total)}\n`;
   receipt += BOLD_OFF + ALIGN_LEFT;
 

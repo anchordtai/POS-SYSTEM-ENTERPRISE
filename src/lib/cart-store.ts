@@ -14,7 +14,6 @@ interface CartStore {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getSubtotal: () => number;
-  getTax: () => number;
   getTotal: () => number;
 }
 
@@ -73,17 +72,9 @@ export const useCartStore = create<CartStore>()(
         return state.items.reduce((total, item) => total + item.subtotal, 0);
       },
       
-      getTax: () => {
-        const state = get();
-        const subtotal = state.items.reduce((total, item) => total + item.subtotal, 0);
-        return subtotal * 0.05; // 5% tax
-      },
-      
       getTotal: () => {
         const state = get();
-        const subtotal = state.items.reduce((total, item) => total + item.subtotal, 0);
-        const tax = subtotal * 0.05; // 5% tax
-        return subtotal + tax;
+        return state.items.reduce((total, item) => total + item.subtotal, 0);
       }
     }),
     {

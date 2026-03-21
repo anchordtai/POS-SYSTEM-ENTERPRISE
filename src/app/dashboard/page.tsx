@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/lib/auth-store";
+import { supabase } from "@/lib/supabase";
+import { formatCurrency } from "@/lib/currency";
 import {
   FiDollarSign,
   FiShoppingCart,
@@ -59,17 +61,69 @@ const demoCategoryData = [
   { name: "Food", value: 8, color: "#D97706" },
 ];
 
-const demoRecentSales = [
-  { id: "1", time: "2 min ago", items: 4, total: 125.0, cashier: "Cashier 1" },
-  { id: "2", time: "5 min ago", items: 2, total: 45.5, cashier: "Cashier 2" },
-  { id: "3", time: "8 min ago", items: 6, total: 210.0, cashier: "Cashier 1" },
-  { id: "4", time: "12 min ago", items: 1, total: 25.0, cashier: "Cashier 2" },
-  { id: "5", time: "15 min ago", items: 3, total: 89.99, cashier: "Cashier 1" },
-];
-
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "super_admin";
+  const [recentSales, setRecentSales] = useState<any[]>([]);
+  const [loadingSales, setLoadingSales] = useState(true);
+
+  // Fetch recent sales from database
+  const fetchRecentSales = async () => {
+    try {
+      setLoadingSales(true);
+      const { data, error } = await supabase
+        .from('sales')
+        .select(`
+          id,
+          receipt_number,
+          total_amount,
+          payment_method,
+          created_at,
+          cashier_name,
+          items
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      // Transform data for display
+      const transformedSales = data?.map(sale => ({
+        id: sale.receipt_number || sale.id,
+        time: formatTimeAgo(sale.created_at),
+        items: sale.items?.length || 0,
+        total: sale.total_amount,
+        cashier: sale.cashier_name || 'Unknown'
+      })) || [];
+
+      setRecentSales(transformedSales);
+    } catch (error) {
+      console.error('Error fetching recent sales:', error);
+      setRecentSales([]);
+    } finally {
+      setLoadingSales(false);
+    }
+  };
+
+  // Helper function to format time ago
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 60) {
+      return `${diffMins} min ago`;
+    } else if (diffMins < 1440) {
+      return `${Math.floor(diffMins / 60)} hours ago`;
+    } else {
+      return `${Math.floor(diffMins / 1440)} days ago`;
+    }
+  };
+
+  useEffect(() => {
+    fetchRecentSales();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -324,32 +378,45 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="space-y-4">
-            {demoRecentSales.map((sale) => (
-              <div
-                key={sale.id}
-                className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
-                    <FiShoppingCart className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      #{sale.id.padStart(4, "0")}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {sale.items} items • {sale.cashier}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    ${sale.total.toFixed(2)}
-                  </p>
-                  <p className="text-sm text-gray-500">{sale.time}</p>
-                </div>
+            {loadingSales ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p>Loading recent sales...</p>
               </div>
-            ))}
+            ) : recentSales.length > 0 ? (
+              recentSales.map((sale) => (
+                <div
+                  key={sale.id}
+                  className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
+                      <FiShoppingCart className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        #{sale.id}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {sale.items} items • {sale.cashier}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">
+                      {formatCurrency(sale.total)}
+                    </p>
+                    <p className="text-sm text-gray-500">{sale.time}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <FiShoppingCart className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>No recent sales</p>
+                <p className="text-sm mt-2">Sales will appear here as transactions are made</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
