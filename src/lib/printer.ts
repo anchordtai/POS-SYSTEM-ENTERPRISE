@@ -92,7 +92,7 @@ async function printThermalReceipt(data: ReceiptData) {
   receipt += NORMAL_HEIGHT + ALIGN_LEFT + BOLD_ON;
   receipt += `Receipt: ${data.receiptNumber}\n`;
   receipt += `Date: ${data.date}\n`;
-  receipt += `Cashier: ${data.cashier}\n\n`;
+  receipt += `Cashier: ${data.cashierName}\n\n`;
   receipt += BOLD_OFF;
 
   // Items (48 chars max width)
@@ -166,7 +166,7 @@ function printBrowserReceipt(data: ReceiptData) {
       <div style="margin: 15px 0;">
         <div>Receipt: ${data.receiptNumber}</div>
         <div>Date: ${data.date}</div>
-        <div>Cashier: ${data.cashier}</div>
+        <div>Cashier: ${data.cashierName}</div>
       </div>
       
       ${data.items
